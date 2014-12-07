@@ -1,5 +1,5 @@
 
-BUILD_DIR=./build
+BUILD_DIR=build
 
 HOST=arm-linux-gnueabihf
 TARGET_GCC=arm-linux-gnueabihf-gcc
@@ -40,7 +40,13 @@ DROPBEAR_BUILD_DIR=$(shell readlink -f ./)$(DROPBEAR_DIR)/build
 DROPBEAR_CONFIGURE_FLAGS= --host=$(HOST) --prefix=$(DROPBEAR_BUILD_DIR) --enable-widec --with-shared --without-ada --without-progs --without-tests --without-cxx-binding --disable-zlib
 
 
-all: etc lua ncurses nano dropbear
+FBSET_URL=https://launchpadlibrarian.net/1213987/fbset_2.1.orig.tar.gz
+FBSET_TAR=$(BUILD_DIR)/fbset_2.1.orig.tar.gz
+FBSET_DIR=$(BUILD_DIR)/fbset-2.1
+FBSET_BUILD_DIR=$(shell readlink -f ./)$(FBSET_DIR)/build
+
+
+all: etc lua ncurses nano dropbear fbset
 	tar -C $(KOBO_DIR) -zcvf $(KOBO_TAR) . ;
 
 #building the tar based off what's already there
@@ -53,6 +59,17 @@ etc: $(KOBO_DIR)
 
 
 
+fbset: $(FBSET_DIR) $(KOBO_USR_BIN_DIR) $(KOBO_USR_LIB_DIR)
+	cd $(FBSET_DIR) && \
+	make CC=$(TARGET_GCC)
+	cp $(FBSET_DIR)/fbset $(KOBO_USR_BIN_DIR)
+	cp $(FBSET_DIR)/modeline2fb $(KOBO_USR_BIN_DIR)
+
+
+$(FBSET_DIR): $(BUILD_DIR)
+	wget $(FBSET_URL) -O $(FBSET_TAR) 
+	tar -xf $(FBSET_TAR) -C $(BUILD_DIR)
+	
 
 #note: had to make some changes to that standard lua package to get this to work =P.
 #changed the makefile to use arm-linux-gnueabihf
