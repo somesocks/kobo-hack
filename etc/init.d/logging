@@ -1,0 +1,7 @@
+#!/bin/sh
+sleep 5
+
+#which lua > /mnt/onboard/lua.log
+ls -al /usr > /mnt/onboard/usr.log
+ls -al /usr/bin > /mnt/onboard/usr.bin.log
+
