@@ -1,3 +1,5 @@
+#INJECT_ADBLOCKING_HOSTSFILE=yes  # Comment this if you like ads. Uncomment if you don't like ads.
+
 LUA_VERSION=5.3.3
 NCURSES_VERSION=6.0
 NANO_MAJOR_VERSION=2.7
@@ -53,7 +55,10 @@ FBSET_DIR=$(BUILD_DIR)/fbset-$(FBSET_VERSION)
 FBSET_BUILD_DIR=$(shell readlink -f ./)$(FBSET_DIR)/build
 
 
-all: etc lua ncurses nano dropbear fbset
+ADBLOCK_URL=https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+
+
+all: etc adblock lua ncurses nano dropbear fbset
 	tar -C $(KOBO_DIR) -zcvf $(KOBO_TAR) . ;
 
 #building the tar based off what's already there
@@ -64,7 +69,12 @@ etc: $(KOBO_DIR)
 	cp -R $(ETC_DIR) $(KOBO_DIR)	
 
 
-
+adblock:
+ifdef $(INJECT_ADBLOCKING_HOSTSFILE)
+	cd $(KOBO_DIR) && wget $(ADBLOCK_URL) -O etc/hosts
+else
+	echo "No adblocking!"
+endif
 
 fbset: $(FBSET_DIR) $(KOBO_USR_BIN_DIR) $(KOBO_USR_LIB_DIR)
 	cd $(FBSET_DIR) && \
