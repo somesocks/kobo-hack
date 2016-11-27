@@ -1,3 +1,9 @@
+LUA_VERSION=5.3.3
+NCURSES_VERSION=6.0
+NANO_MAJOR_VERSION=2.7
+NANO_VERSION=$(NANO_MAJOR_VERSION).1
+DROPBEAR_VERSION=2016.74
+FBSET_VERSION=2.1
 
 BUILD_DIR=build
 
@@ -13,36 +19,37 @@ KOBO_TAR=$(BUILD_DIR)/KoboRoot.tgz
 
 ETC_DIR=./etc
 
-LUA_URL=http://www.lua.org/ftp/lua-5.2.3.tar.gz
-LUA_TAR=$(BUILD_DIR)/lua-5.2.3.tar.gz
-LUA_DIR=$(BUILD_DIR)/lua-5.2.3
+LUA_URL=http://www.lua.org/ftp/lua-$(LUA_VERSION).tar.gz
+LUA_TAR=$(BUILD_DIR)/lua-$(LUA_VERSION).tar.gz
+LUA_DIR=$(BUILD_DIR)/lua-$(LUA_VERSION)
 LUA=$(LUA_DIR)/src/lua
 LUAC=$(LUA_DIR)/src/luac
 LIBLUA=$(LUA_DIR)/src/liblua.a
 
-NCURSES_URL=http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz
-NCURSES_TAR=$(BUILD_DIR)/ncurses-5.9.tar.gz
-NCURSES_DIR=$(BUILD_DIR)/ncurses-5.9
-NCURSES_BUILD_DIR=$(shell readlink -f ./)$(NCURSES_DIR)/build
+NCURSES_URL=http://ftp.gnu.org/pub/gnu/ncurses/ncurses-$(NCURSES_VERSION).tar.gz
+NCURSES_TAR=$(BUILD_DIR)/ncurses-$(NCURSES_VERSION).tar.gz
+NCURSES_DIR=$(BUILD_DIR)/ncurses-$(NCURSES_VERSION)
+NCURSES_BUILD_DIR=$(shell readlink -f ./)/$(NCURSES_DIR)/build
+NCURSES_INCLUDE_DIR=$(shell readlink -f ./)/$(NCURSES_DIR)/include
 NCURSES_CONFIGURE_FLAGS= --host=$(HOST) --prefix=$(NCURSES_BUILD_DIR) --enable-widec --with-shared --without-ada --without-progs --without-tests --without-cxx-binding
 
-NANO_URL=http://www.nano-editor.org/dist/v2.3/nano-2.3.6.tar.gz
-NANO_TAR=$(BUILD_DIR)/nano-2.3.6.tar.gz
-NANO_DIR=$(BUILD_DIR)/nano-2.3.6
+NANO_URL=http://www.nano-editor.org/dist/v$(NANO_MAJOR_VERSION)/nano-$(NANO_VERSION).tar.gz
+NANO_TAR=$(BUILD_DIR)/nano-$(NANO_VERSION).tar.gz
+NANO_DIR=$(BUILD_DIR)/nano-$(NANO_VERSION)
 NANO_BUILD_DIR=$(shell readlink -f ./)$(NANO_DIR)/build
 NANO_CONFIGURE_FLAGS= --host=$(HOST) --prefix=$(NANO_BUILD_DIR) --enable-widec --with-shared --without-ada --without-progs --without-tests --without-cxx-binding
 
 
-DROPBEAR_URL=https://matt.ucc.asn.au/dropbear/releases/dropbear-2014.66.tar.bz2
-DROPBEAR_TAR=$(BUILD_DIR)/dropbear-2014.66.tar.bz2
-DROPBEAR_DIR=$(BUILD_DIR)/dropbear-2014.66
+DROPBEAR_URL=https://matt.ucc.asn.au/dropbear/releases/dropbear-$(DROPBEAR_VERSION).tar.bz2
+DROPBEAR_TAR=$(BUILD_DIR)/dropbear-$(DROPBEAR_VERSION).tar.bz2
+DROPBEAR_DIR=$(BUILD_DIR)/dropbear-$(DROPBEAR_VERSION)
 DROPBEAR_BUILD_DIR=$(shell readlink -f ./)$(DROPBEAR_DIR)/build
 DROPBEAR_CONFIGURE_FLAGS= --host=$(HOST) --prefix=$(DROPBEAR_BUILD_DIR) --enable-widec --with-shared --without-ada --without-progs --without-tests --without-cxx-binding --disable-zlib
 
 
-FBSET_URL=https://launchpadlibrarian.net/1213987/fbset_2.1.orig.tar.gz
-FBSET_TAR=$(BUILD_DIR)/fbset_2.1.orig.tar.gz
-FBSET_DIR=$(BUILD_DIR)/fbset-2.1
+FBSET_URL=https://launchpadlibrarian.net/1213987/fbset_$(FBSET_VERSION).orig.tar.gz
+FBSET_TAR=$(BUILD_DIR)/fbset_$(FBSET_VERSION).orig.tar.gz
+FBSET_DIR=$(BUILD_DIR)/fbset-$(FBSET_VERSION)
 FBSET_BUILD_DIR=$(shell readlink -f ./)$(FBSET_DIR)/build
 
 
@@ -110,7 +117,7 @@ $(NCURSES_DIR): $(BUILD_DIR)
 #note: to get nano working after install, export TERMINFO=/usr/share/terminfo/
 nano: ncurses $(NANO_BUILD_DIR)
 	cd $(NANO_DIR) && \
-	env LDFLAGS=-L$(NCURSES_BUILD_DIR)/lib ./configure $(NANO_CONFIGURE_FLAGS) && \
+	env CFLAGS="-I${NCURSES_INCLUDE_DIR}" LDFLAGS=-L$(NCURSES_BUILD_DIR)/lib ./configure $(NANO_CONFIGURE_FLAGS) && \
 	make && \
 	make install
 	cp -R $(NANO_BUILD_DIR)/* $(KOBO_USR_DIR)/
@@ -170,4 +177,3 @@ $(BUILD_DIR):
 
 clean:
 	rm -rf $(BUILD_DIR)
-
